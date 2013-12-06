@@ -95,11 +95,11 @@ private:
         Proceso** best = &ready_procs;
         int max_prio = get_prioridad(*best);
         Proceso** cur = &ready_procs;
-        while( (*cur)->next ){
+        while( *cur ){
             cout << "#################################while  cur:" << *cur << endl; 
             int cur_prio = get_prioridad(*cur);
             cout << cur_prio << "  "<< max_prio << endl;
-            if( cur_prio > max_prio ){
+            if( cur_prio >= max_prio ){
                 best = cur;
                 max_prio = cur_prio;
                 cout << "########################if" << endl;                
