@@ -6,7 +6,7 @@ using namespace std;
 #include "memoria.h"
 #include "proceso.h"
 #include "cpu_info.h"
-#define QUANTUM 100000
+#define QUANTUM 5000000		// nanosegundos
 
 void wait(int secs){
 	for(int i=0; i<secs; ++i){
@@ -45,40 +45,26 @@ public:
         }
 	}
 
+
+
 	void run(){
 		if( is_running() ){
-			cout << "Corriendo ";
 			Proceso* proc = cola_cpu->get_proceso(slot);
-			string nombre = proc->nombre;
-			if(proc->id == -1 )
+			if(proc->estado == CREADO)
 			{
-				if(proc->estado == CREADO)
-				{
-					string p = nombre +"&";
-					
-					system(p.c_str());
-					proc->id = getProcId(nombre);
-				}
-				else
-				{
-					proc->estado = TERMINADO;
-					set_free();
-					return;
-				}
-				
+				proc->id = crear_realproc(proc);
 			}
-			cout << "proceso: " << nombre ;
-			char buffer [10];
-			string parar ="kill -stop " + itoa(proc->id);
-			string continuar ="kill -cont " + itoa(proc->id);
+			else if(proc->estado == LISTO){
+				reanudar_realproc(proc);
+			}
+
 			proc->estado = CORRIENDO;
-			system(continuar.c_str());
+			cout << "Corriendo proceso: " << proc->nombre << endl;
+			cout.flush();
+
 			usleep(QUANTUM);
-			system(parar.c_str());
+			parar_realproc(proc);
 			proc->estado = LISTO;
-			/*cout.flush();
-			wait(10);
-			proc->estado = TERMINADO;*/
 			set_free();
 		}
 		
@@ -86,6 +72,23 @@ public:
 
 
 private:
+
+	int crear_realproc(Proceso* proc){
+		string nombre = proc->nombre;
+		string p = nombre +"&";
+		system(p.c_str());
+		return getProcId(nombre);
+	}
+
+	void reanudar_realproc(Proceso* proc){
+		string continuar ="kill -cont " + itoa(proc->id);
+		system(continuar.c_str());
+	}
+
+	void parar_realproc(Proceso* proc){
+		string parar ="kill -stop " + itoa(proc->id);
+		system(parar.c_str());
+	}
 
 	bool is_running(){
 		return cola_cpu->is_running(slot);

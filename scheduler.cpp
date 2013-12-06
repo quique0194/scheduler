@@ -27,14 +27,10 @@ public:
         procesos[MAX_NRO_PROC-1].next = 0;
     }
 
-    void set_prioridad(Proceso* proc){
-        proc->prioridad = 1;
-    }
-
     void get_nuevos_procesos(){
         while( !cola_proc->is_empty() ){
             Proceso* proc = pop_empty_proc();
-            cola_proc->retirar(proc);
+            cola_proc->retirar(proc);               // Copia el nuevo proceso en el espacio vacio
             proc->estado = CREADO;
             set_prioridad(proc);
             cout << "Recibido: " << proc->nombre << endl;
@@ -43,29 +39,31 @@ public:
     }
 
     void sched(){
-        while( exists_ready_proc() ){
+        if( cola_cpu->exists_free_cpu() ){
             int free_cpu = cola_cpu->get_free_cpu();
-            if( free_cpu == -1 ){
-                return;
-            }
-            //cur->estado = CORRIENDO;
             Proceso* ready = cola_cpu->get_proceso(free_cpu);
-         	if (ready->estado == LISTO)	
-         	{
+            if (ready->estado == LISTO) 
+            {
                 Proceso* p = pop_empty_proc();      // Saca un espacio vacio para el proceso
                 *p = *ready;                        // Copia el proceso en el espacio vacio
-         		push_ready_proc(p);                 // Añade el espacio ahora lleno a la lista de ready
-         	}
-            Proceso* cur = pop_ready_proc();
-            cola_cpu->set_proceso(free_cpu, cur);
-            cola_cpu->set_running(free_cpu);
-            cout << "\t\t\tProcesando: " << cur->nombre << endl;
-            cout << "\t\t\tCpu: " << free_cpu << endl;
-
+                push_ready_proc(p);                 // Añade el espacio ahora lleno a la lista de ready
+            }
+            if( exists_ready_proc() ){
+                Proceso* cur = pop_ready_proc();
+                cola_cpu->set_proceso(free_cpu, cur);
+                push_empty_proc(cur);
+                cola_cpu->set_running(free_cpu);
+                cout << "\t\t\tProcesando: " << cur->nombre << endl;
+                cout << "\t\t\tCpu: " << free_cpu << endl;
+            }
         }
     }
 
 private:
+    void set_prioridad(Proceso* proc){
+        proc->prioridad = 1;
+    }
+
     bool exists_empty_proc(){
         return empty_procs;
     }
