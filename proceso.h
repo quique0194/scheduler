@@ -63,7 +63,8 @@ struct Proceso{
 	char nombre[8];
 	Proceso* next;
 	int estado;				// 0 creado, 1 listo, 2 corriendo , 3 terminado
-	int prioridad;
+	int sprio;				// prioridad estatica
+	int dprio;				// prioridad dinamica
 	int nro_inst;
 };
 

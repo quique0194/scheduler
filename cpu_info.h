@@ -18,6 +18,8 @@ public:
 				cpus[i].conectado = 0;
 				cpus[i].running = 0;	
 				cpus[i].proceso.estado == TERMINADO;
+				cpus[i].proceso.sprio = 0;
+				cpus[i].proceso.dprio = 0;
 			}
 			
 		}

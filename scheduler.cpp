@@ -1,5 +1,8 @@
 #include <iostream>
 #include <unistd.h>
+#include <time.h>
+#include <stdlib.h>
+#include <stdio.h>
 
 using namespace std;
 
@@ -8,11 +11,14 @@ using namespace std;
 #include "cpu_info.h"
 
 #define MAX_NRO_PROC 100
+#define MAX_SPRIO 20
 
 
 class Scheduler{
 public:
     Scheduler(int cola_proc_id, int cola_cpu_id){
+        srand(time(0));
+
         cola_proc = (ColaDeProcesos*)compartir_memoria(sizeof(ColaDeProcesos), cola_proc_id);
         cola_proc->init();
 
@@ -61,7 +67,12 @@ public:
 
 private:
     void set_prioridad(Proceso* proc){
-        proc->prioridad = 1;
+        proc->sprio = ( rand() % MAX_SPRIO ) + 1;
+    }
+
+    int get_prioridad(Proceso* proc){
+        if( proc->dprio == 0 ) 
+            proc->dprio = proc->sprio;
     }
 
     bool exists_empty_proc(){
@@ -79,12 +90,16 @@ private:
     }
 
     Proceso* pop_ready_proc(){
+        Proceso** max_prio = &ready_procs;
         Proceso** cur = &ready_procs;
         while( (*cur)->next ){
+            if( get_prioridad(*cur) > get_prioridad(*max_prio) )
+                max_prio = cur;
             cur = &((*cur)->next);
         }
-        Proceso* ret = *cur;
-        *cur = 0;
+        Proceso* ret = *max_prio;
+        --(*max_prio)->dprio;
+        *max_prio = (*max_prio)->next;
         return ret;
     }
 
