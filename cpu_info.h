@@ -1,7 +1,7 @@
 #ifndef CPU_INFO_H
 #define CPU_INFO_H
 
-#define NRO_CPUS 4
+#define NRO_CPUS 2
 
 struct CpuInfo{
 	bool conectado;

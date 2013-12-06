@@ -1,4 +1,4 @@
-#include <iostream>
+ #include <iostream>
 #include <stdio.h>
 #include <unistd.h>
 #include <sys/shm.h>
@@ -20,6 +20,8 @@ int main(){
 		cout << "NUEVO PROCESO: " << endl;
 		cout << "Nombre: ";
 		cin >> proc.nombre;
+		proc.id = -1;
+		proc.estado = CREADO;
 
 		cola->insertar(proc);
 		cout << "Creado: " << proc.nombre << endl;

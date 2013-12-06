@@ -1,19 +1,74 @@
 #define TAM_BUF_PROC 10
 
 #include "semaforo.h"
+#include <unistd.h>
+#include <sys/types.h>
+#include <dirent.h>
+#include <errno.h>
+#include <vector>
+#include <string>
+#include <iostream>
+#include <fstream>
+#include <stdlib.h>
 
-#define TERMINADO 0
-#define CORRIENDO 1
-#define PAUSADO 2
+#define CREADO 0
+#define LISTO 1
+#define CORRIENDO 2
+#define TERMINADO 3
+
+int getProcId(string procName)
+{
+    int pid = -1;
+
+    DIR *dp = opendir("/proc");/*abre /proc (donde estan los procesos) */
+    if (dp != NULL)
+    {
+        // Enumerate all entries in directory until process found
+        struct dirent *dirp;
+        while (pid < 0 && (dirp = readdir(dp)))
+        {
+            int id = atoi(dirp->d_name); /* salta las entradas no númericas*/
+            if (id > 0)
+            {
+                string cmdPath = string("/proc/") + dirp->d_name + "/cmdline";
+                ifstream cmdFile(cmdPath.c_str());
+                string cmdLine;
+                getline(cmdFile, cmdLine);
+                if (!cmdLine.empty())
+                {
+                    
+                    size_t pos = cmdLine.find('\0');
+                    if (pos != string::npos)
+                        cmdLine = cmdLine.substr(0, pos);
+                    
+                    pos = cmdLine.rfind('/');
+                    if (pos != string::npos)
+                        cmdLine = cmdLine.substr(pos + 1);
+                    
+                    if (procName == cmdLine)
+                        pid = id;
+                }
+            }
+        }
+    }
+
+    closedir(dp);
+
+    return pid;
+}
+
 
 struct Proceso{
 	int id;
 	char nombre[8];
 	Proceso* next;
-	int estado;				// 0 terminado, 1 corriendo, 2 pausado
+	int estado;				// 0 creado, 1 listo, 2 corriendo , 3 terminado
 	int prioridad;
 	int nro_inst;
 };
+
+
+
 
 class ColaDeProcesos{
 public:

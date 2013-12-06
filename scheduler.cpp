@@ -43,7 +43,12 @@ public:
                 return;
             }
             Proceso* cur = pop_ready_proc();
-            cur->estado = CORRIENDO;
+            //cur->estado = CORRIENDO;
+            Proceso* ready = cola_cpu->get_proceso(free_cpu);
+         	if (ready->estado == LISTO)	
+         	{
+         		 push_ready_proc(ready);
+         	}
             cola_cpu->set_proceso(free_cpu, cur);
             cola_cpu->set_running(free_cpu);
             cout << "\t\t\tProcesando: " << cur->nombre << endl;
