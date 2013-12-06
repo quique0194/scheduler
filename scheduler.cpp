@@ -68,11 +68,13 @@ public:
 private:
     void set_prioridad(Proceso* proc){
         proc->sprio = ( rand() % MAX_SPRIO ) + 1;
+        proc->dprio = proc->sprio;
     }
 
     int get_prioridad(Proceso* proc){
-        if( proc->dprio == 0 ) 
+        if( proc->dprio <= 0 ) 
             proc->dprio = proc->sprio;
+        return proc->dprio;
     }
 
     bool exists_empty_proc(){
@@ -90,16 +92,23 @@ private:
     }
 
     Proceso* pop_ready_proc(){
-        Proceso** max_prio = &ready_procs;
+        Proceso** best = &ready_procs;
+        int max_prio = get_prioridad(*best);
         Proceso** cur = &ready_procs;
         while( (*cur)->next ){
-            if( get_prioridad(*cur) > get_prioridad(*max_prio) )
-                max_prio = cur;
+            cout << "#################################while  cur:" << *cur << endl; 
+            int cur_prio = get_prioridad(*cur);
+            cout << cur_prio << "  "<< max_prio << endl;
+            if( cur_prio > max_prio ){
+                best = cur;
+                max_prio = cur_prio;
+                cout << "########################if" << endl;                
+            }
             cur = &((*cur)->next);
         }
-        Proceso* ret = *max_prio;
-        --(*max_prio)->dprio;
-        *max_prio = (*max_prio)->next;
+        Proceso* ret = *best;
+        --(*best)->dprio;
+        *best = (*best)->next;
         return ret;
     }
 

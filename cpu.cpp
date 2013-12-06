@@ -6,7 +6,7 @@ using namespace std;
 #include "memoria.h"
 #include "proceso.h"
 #include "cpu_info.h"
-#define QUANTUM 5000000		// nanosegundos
+#define QUANTUM 1000000		// nanosegundos
 
 void wait(int secs){
 	for(int i=0; i<secs; ++i){
@@ -55,14 +55,28 @@ public:
 				proc->id = crear_realproc(proc);
 			}
 			else if(proc->estado == LISTO){
+				if(!existe_proceso(proc->nombre))
+				{
+					proc->estado = TERMINADO;
+					set_free();
+					return;
+				}
 				reanudar_realproc(proc);
 			}
+			
 
 			proc->estado = CORRIENDO;
 			cout << "Corriendo proceso: " << proc->nombre << endl;
+			cout << "Prioridad dinamica: " << proc->dprio << endl << endl;
 			cout.flush();
 
 			usleep(QUANTUM);
+			if(!existe_proceso(proc->nombre))
+			{
+				proc->estado = TERMINADO;
+				set_free();
+				return;
+			}
 			parar_realproc(proc);
 			proc->estado = LISTO;
 			set_free();
@@ -89,6 +103,14 @@ private:
 		string parar ="kill -stop " + itoa(proc->id);
 		system(parar.c_str());
 	}
+
+	bool existe_proceso(string name)
+	{
+		if(getProcId(name) == -1)	return false;
+		return true;
+	}
+
+
 
 	bool is_running(){
 		return cola_cpu->is_running(slot);
