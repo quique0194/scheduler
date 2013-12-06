@@ -79,8 +79,12 @@ private:
     }
 
     Proceso* pop_ready_proc(){
-        Proceso* ret = ready_procs;
-        ready_procs = ready_procs->next;
+        Proceso** cur = &ready_procs;
+        while( (*cur)->next ){
+            cur = &((*cur)->next);
+        }
+        Proceso* ret = *cur;
+        *cur = 0;
         return ret;
     }
 
