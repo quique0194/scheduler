@@ -17,6 +17,7 @@ public:
 			for(int i=0; i<NRO_CPUS; ++i){
 				cpus[i].conectado = 0;
 				cpus[i].running = 0;	
+				cpus[i].proceso.estado == TERMINADO;
 			}
 			
 		}

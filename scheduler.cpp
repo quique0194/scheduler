@@ -27,10 +27,16 @@ public:
         procesos[MAX_NRO_PROC-1].next = 0;
     }
 
+    void set_prioridad(Proceso* proc){
+        proc->prioridad = 1;
+    }
+
     void get_nuevos_procesos(){
         while( !cola_proc->is_empty() ){
             Proceso* proc = pop_empty_proc();
             cola_proc->retirar(proc);
+            proc->estado = CREADO;
+            set_prioridad(proc);
             cout << "Recibido: " << proc->nombre << endl;
             push_ready_proc(proc);
         }
@@ -42,13 +48,15 @@ public:
             if( free_cpu == -1 ){
                 return;
             }
-            Proceso* cur = pop_ready_proc();
             //cur->estado = CORRIENDO;
             Proceso* ready = cola_cpu->get_proceso(free_cpu);
          	if (ready->estado == LISTO)	
          	{
-         		 push_ready_proc(ready);
+                Proceso* p = pop_empty_proc();      // Saca un espacio vacio para el proceso
+                *p = *ready;                        // Copia el proceso en el espacio vacio
+         		push_ready_proc(p);                 // Añade el espacio ahora lleno a la lista de ready
          	}
+            Proceso* cur = pop_ready_proc();
             cola_cpu->set_proceso(free_cpu, cur);
             cola_cpu->set_running(free_cpu);
             cout << "\t\t\tProcesando: " << cur->nombre << endl;
